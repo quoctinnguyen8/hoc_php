@@ -47,7 +47,7 @@ function js_redirect_to(string $page, bool $is_stop = true)
 	if (!empty($page)) {
 		echo "<script>location.href = '/$page';</script>";
 	}
-	if ($is_stop){
+	if ($is_stop) {
 		die;
 	}
 }
@@ -88,7 +88,7 @@ function upload(string $filename)
  */
 function upload_and_return_filename(string $name, string $sub_folder = "")
 {
-	if (is_method_post() && isset($_FILES[$name])) {
+	if (is_method_post() && isset($_FILES[$name]) && !empty($_FILES[$name])) {
 		// Xóa dấu slash (gạch chéo) khỏi folder để tiện xử lý sau này
 		$sub_folder = trim($sub_folder, "/\\");
 		$upload_path = DOCUMENT_ROOT_PATH . UPLOAD_PATH;
@@ -103,6 +103,8 @@ function upload_and_return_filename(string $name, string $sub_folder = "")
 		$filenames = $_FILES[$name]["name"];
 		$tmp_file = $_FILES[$name]["tmp_name"];
 		$file_size = $_FILES[$name]["size"];
+
+		if ($file_size <= 0) return null;
 
 		if (is_array($filenames)) {
 			// Upload nhiều file
@@ -230,9 +232,11 @@ function gen_option_ele($table, $col_value = "`id`", $col_text = "`name`", $sele
 	$sql = "select $col_value, $col_text from $table order by $col_value desc";
 	$data = db_select($sql);
 
-	$col_value = end(explode(" as ", $col_value));
+	$tmp = explode(" as ", $col_value);
+	$col_value = end($tmp);
 	$col_value = str_replace("`", "", $col_value);
-	$col_text = end(explode(" as ", $col_text));
+	$tmp = explode(" as ", $col_text);
+	$col_text = end($tmp);
 	$col_text = str_replace("`", "", $col_text);
 	$str = "";
 	foreach ($data as $item) {
